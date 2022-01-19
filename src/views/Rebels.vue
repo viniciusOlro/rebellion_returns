@@ -1,0 +1,164 @@
+<template>
+  <div id="rebels">
+    <div class="container">
+      <div class="search-register-group">
+        <form>
+          <input type="text" v-model="searchRebelInput" placeholder="Busque um rebelde...">
+          <button @click.prevent.stop="(modalIsActive = true), (rebelToEdit = {})">Alistar <i class="fas fa-jedi"></i></button>
+        </form>
+      </div>
+      <div>
+        <RebelItem
+        v-show="searchedRebels.length < 1"
+        v-for="rebel in rebelsData" 
+        :key="rebel.id" 
+        :name="rebel.name" 
+        :description="rebel.description"
+        :planet="rebel.planet"
+        :birthDate="rebel.birthDate"
+        :id="rebel.id"
+        @sendRebelData="sendRebelData(rebel)"
+        @askToDelete="askToDelete(rebel)"
+        />
+        <RebelItem 
+        v-show="searchedRebels.length > 0"
+        v-for="rebel in searchedRebels" 
+        :key="rebel.id + 1" 
+        :name="rebel.name" 
+        :description="rebel.description"
+        :planet="rebel.planet"
+        :birthDate="rebel.birthDate"
+        :id="rebel.id"
+        @sendRebelData="sendRebelData(rebel)"
+        @askToDelete="askToDelete(rebel)"
+        @updateView="updateView()"
+        />
+        <Modal :isActive="modalIsActive" :isExcluding="modalIsExcluding" :rebelToEdit="rebelToEdit" @closeModal="resetTheModal()" @saveRebel="saveRebel()" @editRebel="editRebel()" @deleteRebel="deleteRebel()"/>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+
+import removeAccents from 'remove-accents'
+
+import { mapMutations, mapActions, mapState } from 'vuex'
+
+import RebelItem from '../components/RebelItem.vue'
+import Modal from '../components/Modal.vue'
+
+export default {
+  name: 'Rebels',
+  components: {
+    RebelItem,
+    Modal
+  },
+  data() {
+    return {
+      modalIsActive: false,
+      modalIsExcluding: false,
+      rebelToEdit: {},
+      rebelToDelete: {},
+      searchRebelInput: '',
+      searchedRebels: [],
+      getRebelDataStopper: false
+    }
+  },
+  computed: {
+    ...mapState(['rebelsData', 'rebelToSave'])
+  },
+  methods: {
+    ...mapMutations(['LOGOUT', 'SET_IS_EDITING', 'SET_NOT_IS_EDITING', 'SET_IS_VALIDATION_ERROR', 'DISABLE_IS_VALIDATION_ERROR', 'SET_IS_SUCCESSFUL_OPERATION', 'DISABLE_IS_SUCCESSFUL_OPERATION']),
+    ...mapActions(['getRebelsData', 'registerRebel', 'updateRebel', 'removeRebel']),
+    saveRebel() {
+      this.registerRebel()
+      .then(res => {
+        this.success()
+      })
+    },
+    sendRebelData(rebelToEdit) {
+      this.SET_IS_EDITING()
+      const birthDate = rebelToEdit.birthDate.split('/').reverse().join('-')
+      const { id, name, description, planet } = rebelToEdit
+      const rebel = { id, name, description, planet, birthDate }
+      this.rebelToEdit = rebel
+      this.modalIsActive = true
+    },
+    editRebel() {
+      this.updateRebel(this.rebelToEdit)
+      .then(res => {
+        this.rebelToEdit = {}
+        this.success()
+      })
+    },
+    updateView() {
+      this.searchRebelInput = ''
+    },
+    resetTheModal() {
+      this.modalIsActive = false
+      this.rebelToEdit = {} 
+      this.modalIsExcluding = false
+      this.SET_NOT_IS_EDITING()
+      this.rebelToDelete = {}
+      this.DISABLE_IS_VALIDATION_ERROR()
+      this.DISABLE_IS_SUCCESSFUL_OPERATION()
+    },
+    askToDelete(rebel) {
+      this.rebelToDelete = rebel
+      this.modalIsActive = true
+      this.modalIsExcluding = true
+    },
+    deleteRebel() {
+      this.removeRebel(this.rebelToDelete)
+      this.success()
+    },
+    success() {
+      this.SET_IS_SUCCESSFUL_OPERATION()
+      setTimeout(() => {
+        this.DISABLE_IS_SUCCESSFUL_OPERATION()
+        this.resetTheModal()
+      }, 2000)
+    }
+  },
+  watch: {
+    searchRebelInput(newVal, oldVal) {
+      const rebelsSearched = this.rebelsData.filter(rebel => removeAccents((rebel.name).toLowerCase()) === removeAccents(newVal.toLowerCase()))
+      rebelsSearched.forEach(rebel => this.searchedRebels.push(rebel))
+      if(newVal === '') {
+        this.searchedRebels = []
+        this.getRebelsData()
+      }
+      /**
+       * Chamar a request de rebeldes cadastrados quando o usuário começa a remover o nome pesquisado.
+       * 
+       * getRebelDataStopper => O atributo impede que a função faça o request novamente após o usuário remover o primeiro caractere do nome pesquisado, impedindo que requests excessivos sejam realizados 
+       */
+
+      if(rebelsSearched.length < 1 && this.searchedRebels.length > 0 && !this.getRebelDataStopper) {
+        this.getRebelDataStopper = true
+        this.searchedRebels = []
+        this.getRebelsData()
+      }
+    }
+  },
+  mounted() {
+    this.getRebelsData()
+  }
+}
+</script>
+
+<style>
+
+.search-register-group form {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 5rem 0;
+}
+
+i {
+  margin-left: .5rem;
+}
+
+</style>
