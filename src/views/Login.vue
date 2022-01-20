@@ -1,6 +1,13 @@
 <template>
   <div id="login">
-    <div class="container">
+    <div class="container login">
+      <lord-icon
+        src="https://cdn.lordicon.com/rqqkvjqf.json"
+        trigger="loop"
+        colors="primary:#121331,secondary:#ffa500"
+        stroke="61"
+        style="width:150px;height:150px">
+      </lord-icon>
       <h1 class="title">Login</h1>
       <form @submit.prevent.stop="submitAuth()">
         <input type="text" placeholder="Usuário..." v-model="username">
@@ -79,6 +86,12 @@ export default {
 
 .container form input[type="submit"] {
   width: 100%;
+}
+
+.container.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 
