@@ -14,6 +14,7 @@ export default new Vuex.Store({
     isAuthenticated: false,
     credentials: { username: "viniciusrodrigues", pass: "vuetothemoon" },
     rebelsData: [],
+    searchedRebels: [],
     rebelToSave: { name: '', description: '', planet: '', birthDate: '' },
     isEditing: false,
     isAuthError: false,
@@ -50,6 +51,13 @@ export default new Vuex.Store({
       state.rebelToSave.description = payload.description
       state.rebelToSave.planet = payload.planet
       state.rebelToSave.birthDate = dayjs(payload.birthDate).format('DD/MM/YYYY')
+    },
+    ADD_REBEL_TO_SEARCH_LIST(state, payload) {
+      state.searchedRebels.push(payload)
+      console.log(state.searchedRebels)
+    },
+    CLEAN_REBEL_SEARCH_LIST(state) {
+      state.searchedRebels = []
     },
     SET_IS_EDITING(state) {
       state.isEditing = true

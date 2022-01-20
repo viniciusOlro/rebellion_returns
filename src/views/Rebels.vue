@@ -22,7 +22,7 @@
         />
         <RebelItem 
         v-show="searchedRebels.length > 0"
-        v-for="rebel in searchedRebels" 
+        v-for="rebel in rebelsSearched" 
         :key="rebel.id + 1" 
         :name="rebel.name" 
         :description="rebel.description"
@@ -61,15 +61,16 @@ export default {
       rebelToEdit: {},
       rebelToDelete: {},
       searchRebelInput: '',
-      searchedRebels: [],
+      // searchedRebels: [],
+      rebelsSearched: [],
       getRebelDataStopper: false
     }
   },
   computed: {
-    ...mapState(['rebelsData', 'rebelToSave'])
+    ...mapState(['rebelsData', 'rebelToSave', 'searchedRebels'])
   },
   methods: {
-    ...mapMutations(['LOGOUT', 'SET_IS_EDITING', 'SET_NOT_IS_EDITING', 'SET_IS_VALIDATION_ERROR', 'DISABLE_IS_VALIDATION_ERROR', 'SET_IS_SUCCESSFUL_OPERATION', 'DISABLE_IS_SUCCESSFUL_OPERATION']),
+    ...mapMutations(['LOGOUT', 'SET_IS_EDITING', 'SET_NOT_IS_EDITING', 'SET_IS_VALIDATION_ERROR', 'DISABLE_IS_VALIDATION_ERROR', 'SET_IS_SUCCESSFUL_OPERATION', 'DISABLE_IS_SUCCESSFUL_OPERATION', 'ADD_REBEL_TO_SEARCH_LIST', 'CLEAN_REBEL_SEARCH_LIST']),
     ...mapActions(['getRebelsData', 'registerRebel', 'updateRebel', 'removeRebel']),
     saveRebel() {
       this.registerRebel()
@@ -123,10 +124,23 @@ export default {
   },
   watch: {
     searchRebelInput(newVal, oldVal) {
-      const rebelsSearched = this.rebelsData.filter(rebel => removeAccents((rebel.name).toLowerCase()) === removeAccents(newVal.toLowerCase()))
-      rebelsSearched.forEach(rebel => this.searchedRebels.push(rebel))
+      const rebelsSearched = this.rebelsData.filter(rebel => removeAccents((rebel.name).toLowerCase()).includes((newVal.toLowerCase())))
+      if(rebelsSearched.length > 0) {
+        
+        rebelsSearched.forEach(rebel => {
+          if(!this.searchedRebels.some(addedRebel => addedRebel.id === rebel.id)) {
+            this.ADD_REBEL_TO_SEARCH_LIST(rebel)
+          }
+
+          this.rebelsSearched = rebelsSearched
+          
+          // console.log("FORAM ACHADOS: ", rebelsSearched)
+          // console.log("FORAM PRO VUEX: ", this.searchedRebels)
+        })
+      } 
+      
       if(newVal === '') {
-        this.searchedRebels = []
+        this.CLEAN_REBEL_SEARCH_LIST()
         this.getRebelsData()
       }
       /**
@@ -137,7 +151,7 @@ export default {
 
       if(rebelsSearched.length < 1 && this.searchedRebels.length > 0 && !this.getRebelDataStopper) {
         this.getRebelDataStopper = true
-        this.searchedRebels = []
+        this.CLEAN_REBEL_SEARCH_LIST()
         this.getRebelsData()
       }
     }
