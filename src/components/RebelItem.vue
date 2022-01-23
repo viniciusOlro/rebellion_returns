@@ -1,7 +1,15 @@
 <template>
-  <div id="rebel-item">
+  <div id="rebel-item" :class="{birthday: isBirthday}">
     <div>
-      <img class="rebellion-logo" src="../assets/rebel-icon.svg">
+      <img v-show="!isBirthday" class="rebellion-logo" src="../assets/rebel-icon.svg">
+      <lord-icon
+        v-show="isBirthday"
+        src="https://cdn.lordicon.com/lupuorrc.json"
+        trigger="loop"
+        colors="primary:#00a300,secondary:#ffa500"
+        stroke="72"
+        style="width:150px;height:150px">
+      </lord-icon>
     </div>
     <div class="content-group">
       <div>
@@ -10,7 +18,7 @@
       </div>
       <div>
         <p>{{ id }}<i class="fas fa-id-card-alt"></i></p>
-        <p>{{ birthDate }}<i class="fas fa-calendar-alt"></i></p>
+        <p :class="{birthday_text: isBirthday}">{{ birthDate }}<i class="fas fa-calendar-alt"></i></p>
         <p>Planeta {{ capitalizeFirstLetter(planet) }}<i class="fas fa-globe-americas"></i></p>
         <div class="button-group">
           <button class="edit" @click="$emit('sendRebelData'), $emit('updateView')">Editar<i class="fas fa-edit"></i></button>
@@ -22,13 +30,36 @@
 </template>
 
 <script>
+
+import dayjs from 'dayjs'
+
 export default {
   name: 'RebelItem',
-  props: ['name', 'description', 'planet', 'id', 'birthDate'],
+  props: ['name', 'description', 'planet', 'id', 'birthDate', 'rebel'],
+  data() {
+    return {
+      isBirthday: false
+    }
+  },
   methods: {
     capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+    checkIsBirthday() {
+      const today = dayjs(new Date()).format("DD/MM")
+      const birthDate = this.rebel.birthDate.split('/').splice(0, 2).join('/')
+      if(birthDate === today) {
+        this.isBirthday = true
+      } else {
+        this.isBirthday = false
+      }
     }
+  },
+  mounted() {
+    this.checkIsBirthday()
+  },
+  updated() {
+    this.checkIsBirthday()
   }
 }
 </script>
@@ -145,6 +176,28 @@ i {
 .button-group {
   display: flex;
   gap: 1.3rem;
+}
+
+.birthday {
+  background: linear-gradient(-45deg, #060b0c, #252525, #111111, #010530);
+  background-size: 400% 400%;
+  animation: gradient 10s ease infinite;
+}
+
+.birthday_text {
+  color: orange;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 </style>

@@ -12,6 +12,7 @@
         v-show="searchedRebels.length < 1"
         v-for="rebel in rebelsData" 
         :key="rebel.id" 
+        :rebel="rebel"
         :name="rebel.name" 
         :description="rebel.description"
         :planet="rebel.planet"
@@ -24,6 +25,7 @@
         v-show="searchedRebels.length > 0"
         v-for="rebel in rebelsSearched" 
         :key="rebel.id + 1" 
+        :rebel="rebel"
         :name="rebel.name" 
         :description="rebel.description"
         :planet="rebel.planet"
@@ -61,7 +63,6 @@ export default {
       rebelToEdit: {},
       rebelToDelete: {},
       searchRebelInput: '',
-      // searchedRebels: [],
       rebelsSearched: [],
       getRebelDataStopper: false
     }

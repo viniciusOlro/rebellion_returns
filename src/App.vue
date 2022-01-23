@@ -51,7 +51,7 @@ a {
 }
 
 a:hover {
-  color: orange;
+  color: #ffa500;
 }
 
 li {
