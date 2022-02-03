@@ -8,33 +8,47 @@
         </form>
       </div>
       <div>
-        <RebelItem
-        v-show="searchedRebels.length < 1"
-        v-for="rebel in rebelsData" 
-        :key="rebel.id" 
-        :rebel="rebel"
-        :name="rebel.name" 
-        :description="rebel.description"
-        :planet="rebel.planet"
-        :birthDate="rebel.birthDate"
-        :id="rebel.id"
-        @sendRebelData="sendRebelData(rebel)"
-        @askToDelete="askToDelete(rebel)"
-        />
-        <RebelItem 
-        v-show="searchedRebels.length > 0"
-        v-for="rebel in rebelsSearched" 
-        :key="rebel.id + 1" 
-        :rebel="rebel"
-        :name="rebel.name" 
-        :description="rebel.description"
-        :planet="rebel.planet"
-        :birthDate="rebel.birthDate"
-        :id="rebel.id"
-        @sendRebelData="sendRebelData(rebel)"
-        @askToDelete="askToDelete(rebel)"
-        @updateView="updateView()"
-        />
+        <div v-if="searchedRebels.length < 1">
+          <RebelItem
+          v-for="rebel in rebelsData" 
+          :key="rebel.id" 
+          :rebel="rebel"
+          :name="rebel.name" 
+          :description="rebel.description"
+          :planet="rebel.planet"
+          :birthDate="rebel.birthDate"
+          :id="rebel.id"
+          @sendRebelData="sendRebelData(rebel)"
+          @askToDelete="askToDelete(rebel)"
+          />
+        </div>
+        <div v-else-if="searchedRebels.length > 0">
+          <RebelItem 
+          v-for="rebel in rebelsSearched" 
+          :key="rebel.id + 1" 
+          :rebel="rebel"
+          :name="rebel.name" 
+          :description="rebel.description"
+          :planet="rebel.planet"
+          :birthDate="rebel.birthDate"
+          :id="rebel.id"
+          @sendRebelData="sendRebelData(rebel)"
+          @askToDelete="askToDelete(rebel)"
+          @updateView="updateView()"
+          />
+        </div>
+        <div v-show="rebelsData.length < 1">
+          <div class="loading">
+            <lord-icon
+              src="https://cdn.lordicon.com/xjovhxra.json"
+              trigger="loop"
+              colors="primary:#ffa500,secondary:#08a88a"
+              style="width:250px;height:250px">
+            </lord-icon>
+            <h1 class="title">Aguarde!</h1>
+            <h2>Estamos buscando nos confins da galáxia<br> a lista de rebeldes alistados!</h2>
+          </div>
+        </div>
         <Modal :isActive="modalIsActive" :isExcluding="modalIsExcluding" :rebelToEdit="rebelToEdit" @closeModal="resetTheModal()" @saveRebel="saveRebel()" @editRebel="editRebel()" @deleteRebel="deleteRebel()"/>
       </div>
     </div>
@@ -174,6 +188,21 @@ export default {
 
 i {
   margin-left: .5rem;
+}
+
+.loading {
+  display: inline-block;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading h2 {
+  color: #ffa500;
+  font-weight: 300;
+  font-size: 1.4rem;
 }
 
 </style>
